@@ -9,9 +9,11 @@ import SwiftUI
 
 @main
 struct SwiftFitLineApp: App {
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(solver)
         }
     }
 }
