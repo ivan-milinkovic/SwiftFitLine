@@ -20,6 +20,7 @@
 		2CC753B82ABED75E008E2A5A /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2CC753BA2ABED75E008E2A5A /* SwiftFitLine.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = SwiftFitLine.entitlements; sourceTree = "<group>"; };
 		2CC753BC2ABED75E008E2A5A /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		2CE308712AC1EF3C0087E213 /* math.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = math.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -52,6 +53,7 @@
 		2CC753B32ABED75D008E2A5A /* SwiftFitLine */ = {
 			isa = PBXGroup;
 			children = (
+				2CE308712AC1EF3C0087E213 /* math.png */,
 				2CC753B42ABED75D008E2A5A /* SwiftFitLineApp.swift */,
 				2CC753B62ABED75D008E2A5A /* ContentView.swift */,
 				2CC753B82ABED75E008E2A5A /* Assets.xcassets */,
