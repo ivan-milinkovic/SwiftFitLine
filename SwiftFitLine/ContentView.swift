@@ -18,23 +18,23 @@ struct Point: Hashable {
 }
 
 struct Line {
-    let k: Float
-    let c: Float
+    let w: Float
+    let b: Float
     
     init(_ k: Float, _ c: Float) {
-        self.k = k
-        self.c = c
+        self.w = k
+        self.b = c
     }
     
     func f(_ x: Float) -> Float {
-        k * x + c
+        w * x + b
     }
 }
 
-func lossf_points(trainingData: [Point], inputs: [Float], isK: Bool) -> [Point] {
+func lossf_points(trainingData: [Point], inputs: [Float], isW: Bool) -> [Point] {
     inputs.map { input in
         // Identity values: 0 for addition, 1 for multiplication
-        let line = isK ? Line(input, 0) : Line(1, input)
+        let line = isW ? Line(input, 0) : Line(1, input)
         let ssr = lossf(trainingData: trainingData, line: line)
         return Point(input, ssr)
     }
@@ -54,20 +54,20 @@ func lossf(at pt: Point, line: Line) -> Float {
     return diff * diff
 }
 
-func gradient_dk(trainingData: [Point], line: Line) -> Float {
+func gradient_dw(trainingData: [Point], line: Line) -> Float {
     var sum = Float(0.0)
     for i in 0..<trainingData.count {
         let pt = trainingData[i]
-        sum += -2 * pt.x * (pt.y - line.k * pt.x - line.c)
+        sum += -2 * pt.x * (pt.y - line.w * pt.x - line.b)
     }
     return sum
 }
 
-func gradient_dc(trainingData: [Point], line: Line) -> Float {
+func gradient_db(trainingData: [Point], line: Line) -> Float {
     var sum = Float(0.0)
     for i in 0..<trainingData.count {
         let pt = trainingData[i]
-        sum += -2 * (pt.y - line.k * pt.x - line.c)
+        sum += -2 * (pt.y - line.w * pt.x - line.b)
     }
     return sum
 }
@@ -75,13 +75,13 @@ func gradient_dc(trainingData: [Point], line: Line) -> Float {
 class Solver: ObservableObject {
     
     let trainingData = [Point(1,1), Point(2,2), Point(3,3), Point(4,4)]
-    var line = Line(0.2, 0.5)
+    var line = Line(0.0, 0.0)
     
-    var loss_graph_k_points = [Point]()
-    var loss_graph_c_points = [Point]()
+    var loss_graph_w_points = [Point]()
+    var loss_graph_b_points = [Point]()
     
-    var current_loss_k_point  = Point(0,0)
-    var current_loss_c_point  = Point(0,0)
+    var current_loss_w_point  = Point(0,0)
+    var current_loss_b_point  = Point(0,0)
     var current_loss = Float(0.0)
     
     // If the learning rate is too large (depends on training data), the algorithm will not converge
@@ -89,36 +89,43 @@ class Solver: ObservableObject {
     
     init() {
         makeLossGraphPoints()
+        resetLine()
+    }
+    
+    func resetLine() {
+        if isAnimating { stopAnimating() }
+        line = Line(0.2, 0.5)
         updateCurrentLossPoints()
+        objectWillChange.send()
     }
     
     func makeLossGraphPoints() {
         let ks = stride(from: Float(-2), through: 2, by: 0.2)
-        loss_graph_k_points = lossf_points(trainingData: trainingData, inputs: Array(ks), isK: true)
+        loss_graph_w_points = lossf_points(trainingData: trainingData, inputs: Array(ks), isW: true)
         
         let cs = stride(from: Float(-2), through: 2, by: 0.2)
-        loss_graph_c_points = lossf_points(trainingData: trainingData, inputs: Array(cs), isK: false)
+        loss_graph_b_points = lossf_points(trainingData: trainingData, inputs: Array(cs), isW: false)
     }
     
     func updateCurrentLossPoints() {
-        let current_k_loss = lossf(trainingData: trainingData, line: Line(line.k, 0)) // 0 is identity for addition
-        current_loss_k_point = Point(line.k, current_k_loss)
+        let current_k_loss = lossf(trainingData: trainingData, line: Line(line.w, 0)) // 0 is identity for addition
+        current_loss_w_point = Point(line.w, current_k_loss)
         
-        let current_c_loss = lossf(trainingData: trainingData, line: Line(1, line.c)) // 1 is identity for multiplication
-        current_loss_c_point = Point(line.c, current_c_loss)
+        let current_c_loss = lossf(trainingData: trainingData, line: Line(1, line.b)) // 1 is identity for multiplication
+        current_loss_b_point = Point(line.b, current_c_loss)
         
         current_loss = lossf(trainingData: trainingData, line: line)
     }
     
     func gradientDescentStep(updateObservers: Bool) {
         
-        let grad_k = gradient_dk(trainingData: trainingData, line: line)
+        let grad_k = gradient_dw(trainingData: trainingData, line: line)
         let step_size_k = grad_k * learningRate
-        let new_k = line.k - step_size_k
+        let new_k = line.w - step_size_k
         
-        let grad_c = gradient_dc(trainingData: trainingData, line: line)
+        let grad_c = gradient_db(trainingData: trainingData, line: line)
         let step_size_c = grad_c * learningRate
-        let new_c = line.c - step_size_c
+        let new_c = line.b - step_size_c
         
         line = Line(new_k, new_c)
         
@@ -206,40 +213,47 @@ struct ContentView: View {
             
             Spacer(minLength: 30)
             
+            // Loss function over k
             VStack {
                 Chart {
-                    ForEach(solver.loss_graph_k_points, id: \.self) { p in
-                        PointMark(x: .value("x", p.x), y: .value("y", p.y))
+                    ForEach(solver.loss_graph_w_points, id: \.self) { p in
+                        LineMark(x: .value("x", p.x), y: .value("y", p.y))
+                            .lineStyle(StrokeStyle(lineWidth: 2.0, dash: [1.0, 5.0]))
                             .foregroundStyle(.gray)
                     }
-                    PointMark(x: .value("x", solver.current_loss_k_point.x),
-                              y: .value("y", solver.current_loss_k_point.y))
+                    PointMark(x: .value("x", solver.current_loss_w_point.x),
+                              y: .value("y", solver.current_loss_w_point.y))
                         .foregroundStyle(.blue)
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading)
                 }
-                Text("k: \(solver.line.k)")
+                Text("k: \(solver.line.w)")
             }
             
+            // Loss function over c
             VStack {
                 Chart {
-                    ForEach(solver.loss_graph_c_points, id: \.self) { p in
-                        PointMark(x: .value("x", p.x), y: .value("y", p.y))
+                    ForEach(solver.loss_graph_b_points, id: \.self) { p in
+                        LineMark(x: .value("x", p.x), y: .value("y", p.y))
+                            .lineStyle(StrokeStyle(lineWidth: 2.0, dash: [1.0, 5.0]))
                             .foregroundStyle(.gray)
                     }
-                    PointMark(x: .value("x", solver.current_loss_c_point.x),
-                              y: .value("y", solver.current_loss_c_point.y))
+                    PointMark(x: .value("x", solver.current_loss_b_point.x),
+                              y: .value("y", solver.current_loss_b_point.y))
                         .foregroundStyle(.blue)
                 }
                 .chartYAxis {
                     AxisMarks(position: .leading)
                 }
-                Text("c: \(solver.line.c)")
+                Text("c: \(solver.line.b)")
             }
             
             HStack {
                 Text("Gradient Descent")
+                Button("Reset") {
+                    solver.resetLine()
+                }
                 Button("Auto") {
                     if solver.isAnimating { solver.stopAnimating() }
                     solver.gradientDescentAuto()
