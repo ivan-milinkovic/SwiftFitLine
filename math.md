@@ -16,16 +16,16 @@ Gradients:
 
 $∂E/∂w = ∑\frac{∂}{∂w}(y_t - w \cdot x - b)^2$
 
-            $= ∑2(y_t - w \cdot x - b)(-x)$
+$= ∑2(y_t - w \cdot x - b)(-x)$
             
-            $= ∑-2x(y_t - w \cdot x - b)$
+$= ∑-2x(y_t - w \cdot x - b)$
 
 
 $∂E/∂b = ∑\frac{∂}{∂w}(y_t - w \cdot x - b)^2$
 
-          $= ∑2(y_t - w \cdot x - b)(-1)$
+$= ∑2(y_t - w \cdot x - b)(-1)$
           
-          $= ∑-2(y_t - w \cdot x - b)$
+$= ∑-2(y_t - w \cdot x - b)$
 
 
 $w_{new} = w - LearningRate \cdot (∂E/∂w)$
