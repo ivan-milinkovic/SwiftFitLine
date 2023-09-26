@@ -9,7 +9,7 @@ $y_t$ - training value
 
 $y_p$ - predicted value
 
-The chain rule: $\frac{∂f}{∂x}g(f(x)) = g'(f(x)) \cdot f'(x)$
+The chain rule: $\frac{∂f}{∂x}f(g(x)) = f'(g(x)) \cdot g'(x)$
 
 
 Gradients:
@@ -21,7 +21,7 @@ $= ∑2(y_t - w \cdot x - b)(-x)$
 $= ∑-2x(y_t - w \cdot x - b)$
 
 
-$∂E/∂b = ∑\frac{∂}{∂w}(y_t - w \cdot x - b)^2$
+$∂E/∂b = ∑\frac{∂}{∂b}(y_t - w \cdot x - b)^2$
 
 $= ∑2(y_t - w \cdot x - b)(-1)$
           
